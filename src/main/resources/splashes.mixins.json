@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.pepe20129.splashes.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "client": [
+    "SplashesMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

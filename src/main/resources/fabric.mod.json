@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "splashesplus",
+  "version": "${version}",
+  "name": "Splashes+",
+  "description": "A mod to expand splash capabilities including customizable time splashes & the ability to toggle the \"<name> IS YOU\" splash.",
+  "authors": [
+    "Pepe20129/Pablo#1981"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Pepe20129/splashesplus",
+    "sources": "https://github.com/Pepe20129/splashesplus"
+  },
+  "license": "LGPL-3.0-only",
+  "icon": "assets/splashesplus/icon.png",
+  "environment": "client",
+  "mixins": [
+    "splashes.mixins.json"
+  ],
+  "depends": {
+    "java": ">=16",
+    "minecraft": "1.17.x",
+    "fabricloader": ">=0.11.3"
+  }
+}

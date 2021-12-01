@@ -3,7 +3,7 @@
   "id": "splashesplus",
   "version": "${version}",
   "name": "Splashes+",
-  "description": "A mod to expand splash capabilities including customizable time splashes & the ability to toggle the \"<name> IS YOU\" splash.",
+  "description": "A mod to extend splash capabilities including the ability to toggle the \"<name> IS YOU!\" splash & conditional splashes based on date, time, username & Minecraft version.",
   "authors": [
     "Pepe20129/Pablo#1981"
   ],
@@ -18,8 +18,8 @@
     "splashes.mixins.json"
   ],
   "depends": {
-    "java": ">=16",
-    "minecraft": "1.17.x",
-    "fabricloader": ">=0.11.3"
+    "java": ">=17",
+    "minecraft": "1.18.x",
+    "fabricloader": ">=0.12.0"
   }
 }

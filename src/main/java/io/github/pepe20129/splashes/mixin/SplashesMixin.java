@@ -1,5 +1,6 @@
 package io.github.pepe20129.splashes.mixin;
 
+import net.minecraft.MinecraftVersion;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
 import net.minecraft.client.util.Session;
@@ -8,6 +9,7 @@ import net.minecraft.util.Identifier;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,62 +40,99 @@ public class SplashesMixin {
 			String rawData = writer.toString();
 			JSONObject jsonData = new JSONObject(rawData);
 			JSONArray normalSplashes;
-			JSONObject timeSplashes;
+
 			try {
 				normalSplashes = jsonData.getJSONArray("normal_splashes");
-			} catch (org.json.JSONException jsonException) {
+			} catch (JSONException jsonException) {
 				normalSplashes = new JSONArray();
 			}
+
+			JSONArray conditionalSplashes;
 			try {
-				timeSplashes = jsonData.getJSONObject("time_splashes");
-			} catch (org.json.JSONException jsonException) {
-				timeSplashes = new JSONObject();
-			}
-			List<String> list = new ArrayList<>();
-			for (int i=0; i<normalSplashes.length(); i++) {
-				list.add(normalSplashes.getString(i));
+				conditionalSplashes = jsonData.getJSONArray("conditional_splashes");
+			} catch (JSONException jsonException) {
+				conditionalSplashes = new JSONArray();
 			}
 
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(new Date());
-			Iterator<String> keys = timeSplashes.keys();
-			while (keys.hasNext()) {
-				String currentDynamicKey = keys.next();
-				String now = calendar.get(Calendar.YEAR) + "-";
-				if (calendar.get(Calendar.MONTH) + 1 < 10)
-					now += "0";
-				now += calendar.get(Calendar.MONTH) + 1 + "-";
-				if (calendar.get(Calendar.DAY_OF_MONTH) < 10)
-					now += "0";
-				now += calendar.get(Calendar.DAY_OF_MONTH) + " ";
-				if (calendar.get(Calendar.HOUR_OF_DAY) < 10)
-					now += "0";
-				now += calendar.get(Calendar.HOUR_OF_DAY) + ":";
-				if (calendar.get(Calendar.MINUTE) < 10)
-					now += "0";
-				now += calendar.get(Calendar.MINUTE) + ":";
-				if (calendar.get(Calendar.SECOND) < 10)
-					now += "0";
-				now += calendar.get(Calendar.SECOND);
-				Pattern currentDynamicKeyPattern = Pattern.compile(currentDynamicKey);
-				if (currentDynamicKeyPattern.matcher(now).find())
-					return parse(timeSplashes.getString(currentDynamicKey));
+			String now = calendar.get(Calendar.YEAR) + "-";
+			if (calendar.get(Calendar.MONTH) + 1 < 10)
+				now += "0";
+			now += calendar.get(Calendar.MONTH) + 1 + "-";
+			if (calendar.get(Calendar.DAY_OF_MONTH) < 10)
+				now += "0";
+			now += calendar.get(Calendar.DAY_OF_MONTH) + " ";
+			if (calendar.get(Calendar.HOUR_OF_DAY) < 10)
+				now += "0";
+			now += calendar.get(Calendar.HOUR_OF_DAY) + ":";
+			if (calendar.get(Calendar.MINUTE) < 10)
+				now += "0";
+			now += calendar.get(Calendar.MINUTE) + ":";
+			if (calendar.get(Calendar.SECOND) < 10)
+				now += "0";
+			now += calendar.get(Calendar.SECOND);
+
+			Random RANDOM = new Random();
+			JSONObject currentSpecialSplash;
+			for (int i = 0; i< conditionalSplashes.length(); i+=1) {
+				currentSpecialSplash = conditionalSplashes.getJSONObject(i);
+				String time;
+				try {
+					time = currentSpecialSplash.getString("time");
+				} catch (JSONException jsonException) {
+					time = ".*";
+				}
+				Pattern timePattern = Pattern.compile(time);
+
+				String mcVersion;
+				try {
+					mcVersion = currentSpecialSplash.getString("minecraft_version");
+				} catch (JSONException jsonException) {
+					mcVersion = ".*";
+				}
+				Pattern mcVersionPattern = Pattern.compile(mcVersion);
+
+				String username;
+				try {
+					username = currentSpecialSplash.getString("username");
+				} catch (JSONException jsonException) {
+					username = ".*";
+				}
+				Pattern usernamePattern = Pattern.compile(username);
+
+				float chance;
+				try {
+					chance = currentSpecialSplash.getFloat("chance");
+				} catch (JSONException jsonException) {
+					chance = 1;
+				}
+
+				if (timePattern.matcher(now).find() && mcVersionPattern.matcher(MinecraftVersion.CURRENT.getName()).find() && usernamePattern.matcher(this.session.getUsername()).find() && RANDOM.nextFloat() < chance)
+					return parse(currentSpecialSplash.getString("splash"));
+			}
+
+			List<String> list = new ArrayList<>();
+			for (int i=0;i<normalSplashes.length();i++) {
+				list.add(normalSplashes.getString(i));
 			}
 
 			if (list.isEmpty())
 				return null;
-			Random RANDOM = new Random();
+
 			boolean isYou;
 			try {
 				isYou = jsonData.getBoolean("is_you");
-			} catch (org.json.JSONException jsonException) {
+			} catch (JSONException jsonException) {
 				isYou = false;
 			}
-			if (this.session != null && RANDOM.nextInt(list.size()) == 42 && isYou)
+
+			if (isYou && this.session != null && RANDOM.nextInt(list.size()) == 42)
 				return this.session.getUsername().toUpperCase(Locale.ROOT) + " IS YOU";
+
 			String selected = list.get(RANDOM.nextInt(list.size()));
 			while (selected.equals("This message will never appear on the splash screen, isn't that weird?"))
-                selected = list.get(RANDOM.nextInt(list.size()));
+				selected = list.get(RANDOM.nextInt(list.size()));
 			return parse(selected);
 		} catch (IOException ioException) {
 			return null;
@@ -101,26 +140,35 @@ public class SplashesMixin {
 	}
 
 	public String parse(String input) {
-	    if (input.isEmpty())
-	        return null;
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        input = input.replace("%playerName", this.session.getUsername());
-        input = input.replace("%playername", this.session.getUsername().toLowerCase(Locale.ROOT));
-        input = input.replace("%PLAYERNAME", this.session.getUsername().toUpperCase(Locale.ROOT));
-        input = input.replace("%Y", Integer.toString(calendar.get(Calendar.YEAR)));
-        input = input.replace("%y", Integer.toString(calendar.get(Calendar.YEAR)).substring(2, 4));
-        int month = calendar.get(Calendar.MONTH) + 1;
-        String monthS = Integer.toString(month);
-        if (month < 10)
-            monthS = "0" + month;
-        input = input.replace("%m", monthS);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        String dayS = Integer.toString(day);
-        if (day < 10)
-            dayS = "0" + day;
-        input = input.replace("%d", dayS);
-        input = input.replace("%F", calendar.get(Calendar.YEAR) + "-" + monthS + "-" + dayS);
-	    return input;
-    }
+		if (input.isEmpty())
+			return null;
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.setFirstDayOfWeek(Calendar.MONDAY);
+		input = input.replace("%playerName", this.session.getUsername());
+		input = input.replace("%playername", this.session.getUsername().toLowerCase(Locale.ROOT));
+		input = input.replace("%PLAYERNAME", this.session.getUsername().toUpperCase(Locale.ROOT));
+		input = input.replace("%minecraftVersion", MinecraftVersion.CURRENT.getName());
+		input = input.replace("%s", String.valueOf(Math.floor(calendar.getTimeInMillis()/1000)));
+		input = input.replace("%F", "%Y-%m-%d");
+		input = input.replace("%T", "%H:%M:%S");
+		input = input.replace("%R", "%H:%M");
+		input = input.replace("%Y", Integer.toString(calendar.get(Calendar.YEAR)));
+		input = input.replace("%y", Integer.toString(calendar.get(Calendar.YEAR)).substring(2, 4));
+		input = input.replace("%C", Integer.toString(calendar.get(Calendar.YEAR)).substring(0, 2));
+		input = input.replace("%m", intTo2DigitString(calendar.get(Calendar.MONTH) + 1));
+		input = input.replace("%d", intTo2DigitString(calendar.get(Calendar.DAY_OF_MONTH)));
+		input = input.replace("%H", intTo2DigitString(calendar.get(Calendar.HOUR_OF_DAY)));
+		input = input.replace("%M", intTo2DigitString(calendar.get(Calendar.MINUTE)));
+		input = input.replace("%S", intTo2DigitString(calendar.get(Calendar.SECOND)));
+		input = input.replace("%W", intTo2DigitString(calendar.get(Calendar.WEEK_OF_YEAR)));
+		return input;
+	}
+
+	public String intTo2DigitString(int input) {
+		String output = Integer.toString(input);
+		if (input < 10)
+			return "0" + output;
+		return output;
+	}
 }

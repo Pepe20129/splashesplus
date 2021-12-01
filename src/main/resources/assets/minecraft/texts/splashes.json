@@ -304,7 +304,7 @@
         "Pretty scary!",
         "I have a suggestion.",
         "Now with extra hugs!",
-        "Now Java 16!",
+        "Java 16 + 1 = 17!",
         "Woah.",
         "HURNERJSGER?",
         "What's up, Doc?",
@@ -417,7 +417,7 @@
         "Educate your friends on anti-racism!",
         "Support the BIPOC community and creators!",
         "Stand up for equality in your community!",
-        "[this splash text has been delayed until part 2]",
+        "[this splash text is now available]",
         "Contains simulated goats!",
         "Home-made!",
         "There's <<a cat on ,my keyboard!~",
@@ -429,9 +429,18 @@
         "Plant-based light sources!",
         "Made by \"real\" people!"
     ],
-    "time_splashes": {
-        "....-12-24 ..:..:..": "Merry X-mas!",
-        "....-01-01 ..:..:..": "Happy new year!",
-        "....-10-31 ..:..:..": "OOoooOOOoooo! Spooky!"
-    }
+    "conditional_splashes": [
+        {
+            "time": "....-12-24 ..:..:..",
+            "splash": "Merry X-mas!"
+        },
+        {
+            "time": "....-01-01 ..:..:..",
+            "splash": "Happy new year!"
+        },
+        {
+            "time": "....-10-31 ..:..:..",
+            "splash": "OOoooOOOoooo! Spooky!"
+        }
+    ]
 }

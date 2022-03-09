@@ -1,25 +1,30 @@
 {
-  "schemaVersion": 1,
-  "id": "splashesplus",
-  "version": "${version}",
-  "name": "Splashes+",
-  "description": "A mod to extend splash capabilities including the ability to toggle the \"<name> IS YOU!\" splash & conditional splashes based on date, time, username & Minecraft version.",
-  "authors": [
-    "Pepe20129/Pablo#1981"
-  ],
-  "contact": {
-    "homepage": "https://github.com/Pepe20129/splashesplus",
-    "sources": "https://github.com/Pepe20129/splashesplus"
-  },
-  "license": "LGPL-3.0-only",
-  "icon": "assets/splashesplus/icon.png",
-  "environment": "client",
-  "mixins": [
-    "splashes.mixins.json"
-  ],
-  "depends": {
-    "java": ">=17",
-    "minecraft": "1.18.x",
-    "fabricloader": ">=0.12.0"
-  }
+	"schemaVersion": 1,
+	"id": "splashesplus",
+	"version": "${version}",
+	"name": "Splashes+",
+	"description": "A mod to extend splash capabilities including the ability to toggle the \"<name> IS YOU!\" splash & conditional splashes based on date, time, username & Minecraft version.",
+	"authors": [
+		"Pepe20129/Pablo#1981"
+	],
+	"contact": {
+		"homepage": "https://github.com/Pepe20129/splashesplus",
+		"sources": "https://github.com/Pepe20129/splashesplus"
+	},
+	"license": "LGPL-3.0-only",
+	"icon": "assets/splashesplus/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"io.github.pepe20129.splashes.SplashesPlus"
+		]
+	},
+	"mixins": [
+		"splashes.mixins.json"
+	],
+	"depends": {
+		"java": ">=17",
+		"minecraft": "1.18.x",
+		"fabricloader": ">=0.12.0"
+	}
 }

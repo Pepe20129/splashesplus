@@ -16,49 +16,49 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class SplashesPlus implements ClientModInitializer {
+public class SplashesPlus {
+	public static final String MODID = "splashesplus";
+	
+	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
+	
+	public static JsonArray normalSplashes;
+	
+	public static JsonArray conditionalSplashes;
 
-    public static final String MODID = "splashesplus";
+	public static void onInitializeClient() {
+		ResourceManagerHelper clientResources = ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES);
+		
+		clientResources.registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+			@Override
+			public void reload(ResourceManager manager) {
+				normalSplashes = new JsonArray();
+				conditionalSplashes = new JsonArray();
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
+				manager.findResources("texts/splashes", path -> path.getPath().endsWith(".json")).forEach(
+					(key, value) -> {
+						try (InputStream inputStream = value.getInputStream()) {
+							String rawData = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+							inputStream.close();
+							JsonObject jsonData = JsonParser.parseString(rawData).getAsJsonObject();
 
-    public static JsonArray normalSplashes;
+							try {
+								SplashesPlus.normalSplashes.addAll(jsonData.get("normal_splashes").getAsJsonArray());
+							} catch (NullPointerException ignored) {}
 
-    public static JsonArray conditionalSplashes;
-
-    @Override
-    public void onInitializeClient() {
-        ResourceManagerHelper clientResources = ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES);
-
-        clientResources.registerReloadListener(new SimpleSynchronousResourceReloadListener() {
-            @Override
-            public void reload(ResourceManager manager) {
-                normalSplashes = new JsonArray();
-                conditionalSplashes = new JsonArray();
-
-                for (Identifier id : manager.findResources("texts/splashes", path -> path.endsWith(".json"))) {
-                    try (InputStream inputStream = manager.getResource(id).getInputStream()) {
-                        String rawData = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-                        inputStream.close();
-                        JsonObject jsonData = JsonParser.parseString(rawData).getAsJsonObject();
-
-                        try {
-                            SplashesPlus.normalSplashes.addAll(jsonData.get("normal_splashes").getAsJsonArray());
-                        } catch (NullPointerException ignored) {}
-
-                        try {
-                            SplashesPlus.conditionalSplashes.addAll(jsonData.get("conditional_splashes").getAsJsonArray());
-                        } catch (NullPointerException ignored) {}
-                    } catch (Exception exception) {
-                        LOGGER.error("Error occurred while loading splashes file: \"" + id.toString() + "\"", exception);
-                    }
-                }
-            }
-
-            @Override
-            public Identifier getFabricId() {
-                return new Identifier(MODID, "splashes");
-            }
-        });
-    }
+							try {
+								SplashesPlus.conditionalSplashes.addAll(jsonData.get("conditional_splashes").getAsJsonArray());
+							} catch (NullPointerException ignored) {}
+						} catch (Exception exception) {
+							LOGGER.error("Error occurred while loading splashes file: \"" + key.toString() + "\"", exception);
+						}
+					}
+				);
+			}
+			
+			@Override
+			public Identifier getFabricId() {
+				return new Identifier(MODID, "splashes");
+			}
+		});
+	}
 }

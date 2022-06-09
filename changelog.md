@@ -1,3 +1,9 @@
+Version 0.1.1
+------------------------------------------------------
+- Updated to 1.19
+- Added quilt compatibility
+
+------------------------------------------------------
 Version 0.1.0
 ------------------------------------------------------
 - Changed the location of splashes files to allow for compatibility between mods when adding splashes

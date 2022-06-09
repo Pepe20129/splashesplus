@@ -1,0 +1,44 @@
+{
+	"schema_version": 1,
+	"quilt_loader": {
+		"group": "io.github.pepe20129",
+		"id": "splashesplus",
+		"version": "${version}",
+		"entrypoints": {
+			"client": "io.github.pepe20129.splashes.QuiltSplashesPlus"
+		},
+		"depends": [
+			{
+				"id": "java",
+				"versions": ">=17"
+			},
+			{
+				"id": "minecraft",
+				"versions": "1.19.x"
+			},
+			{
+				"id": "quilt-loader",
+				"versions": ">=0.16.0"
+			}
+		],
+		"intermediate_mappings": "net.fabricmc:intermediary",
+		"metadata": {
+			"name": "Splashes+",
+			"description": "A mod to extend splash capabilities including the ability to toggle the \"<name> IS YOU!\" splash & conditional splashes based on date, time, username & Minecraft version.",
+			"contributors": {
+				"Pepe20129/Pablo#1981": "Author"
+			},
+			"contact": {
+				"homepage": "https://github.com/Pepe20129/splashesplus",
+				"issues": "https://github.com/Pepe20129/splashesplus/issues",
+				"sources": "https://github.com/Pepe20129/splashesplus"
+			},
+			"license": "LGPL-3.0-only",
+			"icon": "assets/splashesplus/icon.png"
+		}
+	},
+	"mixin": "splashes.mixins.json",
+	"minecraft": {
+		"environment": "client"
+	}
+}

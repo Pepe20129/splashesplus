@@ -13,6 +13,7 @@ import net.minecraft.client.resource.SplashTextResourceSupplier;
 import net.minecraft.client.util.Session;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.random.Random;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -27,7 +28,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.regex.Pattern;
 
 @Mixin(SplashTextResourceSupplier.class)
@@ -120,7 +120,7 @@ public class SplashesMixin {
 		boolean isYou;
 		try {
 			StringWriter writer = new StringWriter();
-			Resource resource = MinecraftClient.getInstance().getResourceManager().getResource(new Identifier(SplashesPlus.MODID, "texts/splashes/minecraft.json"));
+			Resource resource = MinecraftClient.getInstance().getResourceManager().getResource(new Identifier(SplashesPlus.MODID, "texts/splashes/minecraft.json")).get();
 			IOUtils.copy(resource.getInputStream(), writer, StandardCharsets.UTF_8);
 			String rawData = writer.toString();
 			JsonObject jsonData = JsonParser.parseString(rawData).getAsJsonObject();

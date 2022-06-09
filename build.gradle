@@ -1,5 +1,6 @@
 plugins {
-	id "fabric-loom" version "0.11-SNAPSHOT"
+	id "fabric-loom" version "0.12-SNAPSHOT"
+	id "io.github.juuxel.loom-quiltflower" version "1.7.2"
 	id "maven-publish"
 }
 
@@ -10,7 +11,12 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-repositories {}
+repositories {
+	maven {
+		name = 'Quilt'
+		url = 'https://maven.quiltmc.org/repository/release'
+	}
+}
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -19,12 +25,15 @@ dependencies {
 
 	include(modImplementation(fabricApi.module("fabric-api-base", project.fabric_version)))
 	include(modImplementation(fabricApi.module("fabric-resource-loader-v0", project.fabric_version)))
+
+	compileOnly "org.quiltmc:quilt-loader:${project.quilt_loader_version}"
+	compileOnly "org.quiltmc.qsl.core:qsl_base:${project.qsl_version}+${project.minecraft_version}"
 }
 
 processResources {
 	inputs.property "version", project.version
 
-	filesMatching("fabric.mod.json") {
+	filesMatching(["fabric.mod.json", "quilt.mod.json"]) {
 		expand "version": project.version
 	}
 }
@@ -42,8 +51,8 @@ java {
 }
 
 jar {
-	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+	from("LICENSE.txt") {
+		rename { "LICENSE_${project.archivesBaseName}.txt"}
 	}
 }
 
@@ -55,11 +64,7 @@ publishing {
 		}
 	}
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
+		mavenLocal()
 	}
 }

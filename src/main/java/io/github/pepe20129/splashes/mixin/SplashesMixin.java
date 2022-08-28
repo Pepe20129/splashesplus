@@ -18,9 +18,12 @@ import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -32,6 +35,7 @@ import java.util.regex.Pattern;
 
 @Mixin(SplashTextResourceSupplier.class)
 public class SplashesMixin {
+	@Shadow @Mutable @Final private List<String> splashTexts;
 	@Shadow @Final private Session session;
 	@Shadow @Final private static Random RANDOM;
 	/**
@@ -39,9 +43,8 @@ public class SplashesMixin {
 	 *
 	 * @reason Complete overhaul to the splash code
 	 */
-	@Overwrite
-	@Nullable
-	public String get() {
+	@Inject(method = "get", at = @At("HEAD"), cancellable = true)
+	public void get(CallbackInfoReturnable<String> cir) {
 		if (SplashesPlus.normalSplashes == null) {
 			SplashesPlus.LOGGER.info("Normal splashes not found");
 			SplashesPlus.normalSplashes = new JsonArray();
@@ -108,14 +111,21 @@ public class SplashesMixin {
 			if (timePattern.matcher(now).find() &&
 				minecraftVersionPattern.matcher(MinecraftVersion.CURRENT.getName()).find() &&
 				usernamePattern.matcher(session.getUsername()).find() &&
-				RANDOM.nextFloat() < chance)
-				return parse(currentConditionalSplash.get("splash").getAsString());
+				RANDOM.nextFloat() < chance) {
+				cir.setReturnValue(parse(currentConditionalSplash.get("splash").getAsString()));
+				return;
+			}
 		}
 
 		List<String> normalSplashes = new Gson().fromJson(SplashesPlus.normalSplashes, new TypeToken<List<String>>() {}.getType());
 
-		if (normalSplashes.isEmpty())
-			return null;
+		//to prevent Frame API from overriding the result when it shouldn't
+		splashTexts = normalSplashes;
+
+		if (normalSplashes.isEmpty()) {
+			cir.setReturnValue(null);
+			return;
+		}
 
 		boolean isYou;
 		try {
@@ -129,13 +139,15 @@ public class SplashesMixin {
 			isYou = false;
 		}
 
-		if (isYou && session != null && RANDOM.nextInt(normalSplashes.size()) == 42)
-			return session.getUsername().toUpperCase(Locale.ROOT) + " IS YOU";
+		if (isYou && session != null && RANDOM.nextInt(normalSplashes.size()) == 42) {
+			cir.setReturnValue(session.getUsername().toUpperCase(Locale.ROOT) + " IS YOU");
+			return;
+		}
 
 		String selected = normalSplashes.get(RANDOM.nextInt(normalSplashes.size()));
 		while (selected.equals("This message will never appear on the splash screen, isn't that weird?"))
 			selected = normalSplashes.get(RANDOM.nextInt(normalSplashes.size()));
-		return parse(selected);
+		cir.setReturnValue(parse(selected));
 	}
 
 	@Unique

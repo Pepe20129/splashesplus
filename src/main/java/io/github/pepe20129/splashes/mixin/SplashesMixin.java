@@ -15,7 +15,6 @@ import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import org.apache.commons.io.IOUtils;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -38,41 +37,25 @@ public class SplashesMixin {
 	@Shadow @Mutable @Final private List<String> splashTexts;
 	@Shadow @Final private Session session;
 	@Shadow @Final private static Random RANDOM;
-	/**
-	 * @author Pepe20129/Pablo#1981
-	 *
-	 * @reason Complete overhaul to the splash code
-	 */
+
 	@Inject(method = "get", at = @At("HEAD"), cancellable = true)
 	public void get(CallbackInfoReturnable<String> cir) {
 		if (SplashesPlus.normalSplashes == null) {
-			SplashesPlus.LOGGER.info("Normal splashes not found");
 			SplashesPlus.normalSplashes = new JsonArray();
 		}
 
 		if (SplashesPlus.conditionalSplashes == null) {
-			SplashesPlus.LOGGER.info("Conditional splashes not found");
 			SplashesPlus.conditionalSplashes = new JsonArray();
 		}
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(new Date());
-		String now = calendar.get(Calendar.YEAR) + "-";
-		if (calendar.get(Calendar.MONTH) + 1 < 10)
-			now += "0";
-		now += calendar.get(Calendar.MONTH) + 1 + "-";
-		if (calendar.get(Calendar.DAY_OF_MONTH) < 10)
-			now += "0";
-		now += calendar.get(Calendar.DAY_OF_MONTH) + " ";
-		if (calendar.get(Calendar.HOUR_OF_DAY) < 10)
-			now += "0";
-		now += calendar.get(Calendar.HOUR_OF_DAY) + ":";
-		if (calendar.get(Calendar.MINUTE) < 10)
-			now += "0";
-		now += calendar.get(Calendar.MINUTE) + ":";
-		if (calendar.get(Calendar.SECOND) < 10)
-			now += "0";
-		now += calendar.get(Calendar.SECOND);
+		String now = calendar.get(Calendar.YEAR) + "-" +
+			intTo2DigitString(calendar.get(Calendar.MONTH) + 1) + "-" +
+			intTo2DigitString(calendar.get(Calendar.DAY_OF_MONTH)) + " " +
+			intTo2DigitString(calendar.get(Calendar.HOUR_OF_DAY)) + ":" +
+			intTo2DigitString(calendar.get(Calendar.MINUTE)) + ":" +
+			intTo2DigitString(calendar.get(Calendar.SECOND));
 
 		JsonObject currentConditionalSplash;
 		for (JsonElement element : SplashesPlus.conditionalSplashes) {
@@ -157,23 +140,23 @@ public class SplashesMixin {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(new Date());
 		calendar.setFirstDayOfWeek(Calendar.MONDAY);
-		input = input.replace("%playerName", session.getUsername());
-		input = input.replace("%playername", session.getUsername().toLowerCase(Locale.ROOT));
-		input = input.replace("%PLAYERNAME", session.getUsername().toUpperCase(Locale.ROOT));
-		input = input.replace("%minecraftVersion", MinecraftVersion.CURRENT.getName());
-		input = input.replace("%s", String.valueOf(Math.floor(calendar.getTimeInMillis()/1000)));
-		input = input.replace("%F", "%Y-%m-%d");
-		input = input.replace("%T", "%H:%M:%S");
-		input = input.replace("%R", "%H:%M");
-		input = input.replace("%Y", Integer.toString(calendar.get(Calendar.YEAR)));
-		input = input.replace("%y", Integer.toString(calendar.get(Calendar.YEAR)).substring(2, 4));
-		input = input.replace("%C", Integer.toString(calendar.get(Calendar.YEAR)).substring(0, 2));
-		input = input.replace("%m", intTo2DigitString(calendar.get(Calendar.MONTH) + 1));
-		input = input.replace("%d", intTo2DigitString(calendar.get(Calendar.DAY_OF_MONTH)));
-		input = input.replace("%H", intTo2DigitString(calendar.get(Calendar.HOUR_OF_DAY)));
-		input = input.replace("%M", intTo2DigitString(calendar.get(Calendar.MINUTE)));
-		input = input.replace("%S", intTo2DigitString(calendar.get(Calendar.SECOND)));
-		input = input.replace("%W", intTo2DigitString(calendar.get(Calendar.WEEK_OF_YEAR)));
+		input = input.replace("%playerName", session.getUsername())
+			.replace("%playername", session.getUsername().toLowerCase(Locale.ROOT))
+			.replace("%PLAYERNAME", session.getUsername().toUpperCase(Locale.ROOT))
+			.replace("%minecraftVersion", MinecraftVersion.CURRENT.getName())
+			.replace("%s", String.valueOf(Math.floor(calendar.getTimeInMillis() / 1000f)))
+			.replace("%F", "%Y-%m-%d")
+			.replace("%T", "%H:%M:%S")
+			.replace("%R", "%H:%M")
+			.replace("%Y", Integer.toString(calendar.get(Calendar.YEAR)))
+			.replace("%y", Integer.toString(calendar.get(Calendar.YEAR)).substring(2, 4))
+			.replace("%C", Integer.toString(calendar.get(Calendar.YEAR)).substring(0, 2))
+			.replace("%m", intTo2DigitString(calendar.get(Calendar.MONTH) + 1))
+			.replace("%d", intTo2DigitString(calendar.get(Calendar.DAY_OF_MONTH)))
+			.replace("%H", intTo2DigitString(calendar.get(Calendar.HOUR_OF_DAY)))
+			.replace("%M", intTo2DigitString(calendar.get(Calendar.MINUTE)))
+			.replace("%S", intTo2DigitString(calendar.get(Calendar.SECOND)))
+			.replace("%W", intTo2DigitString(calendar.get(Calendar.WEEK_OF_YEAR)));
 		return input;
 	}
 

@@ -9,6 +9,7 @@ import com.google.gson.reflect.TypeToken;
 import io.github.pepe20129.splashes.SplashesPlus;
 import net.minecraft.MinecraftVersion;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.SplashTextRenderer;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
 import net.minecraft.client.util.Session;
 import net.minecraft.resource.Resource;
@@ -39,7 +40,7 @@ public class SplashesMixin {
 	@Shadow @Final private static Random RANDOM;
 
 	@Inject(method = "get", at = @At("HEAD"), cancellable = true)
-	public void get(CallbackInfoReturnable<String> cir) {
+	public void get(CallbackInfoReturnable<SplashTextRenderer> cir) {
 		if (SplashesPlus.normalSplashes == null) {
 			SplashesPlus.normalSplashes = new JsonArray();
 		}
@@ -95,7 +96,7 @@ public class SplashesMixin {
 				minecraftVersionPattern.matcher(MinecraftVersion.CURRENT.getName()).find() &&
 				usernamePattern.matcher(session.getUsername()).find() &&
 				RANDOM.nextFloat() < chance) {
-				cir.setReturnValue(parse(currentConditionalSplash.get("splash").getAsString()));
+				cir.setReturnValue(new SplashTextRenderer(parse(currentConditionalSplash.get("splash").getAsString())));
 				return;
 			}
 		}
@@ -123,14 +124,14 @@ public class SplashesMixin {
 		}
 
 		if (isYou && session != null && RANDOM.nextInt(normalSplashes.size()) == 42) {
-			cir.setReturnValue(session.getUsername().toUpperCase(Locale.ROOT) + " IS YOU");
+			cir.setReturnValue(new SplashTextRenderer(session.getUsername().toUpperCase(Locale.ROOT) + " IS YOU"));
 			return;
 		}
 
 		String selected = normalSplashes.get(RANDOM.nextInt(normalSplashes.size()));
 		while (selected.equals("This message will never appear on the splash screen, isn't that weird?"))
 			selected = normalSplashes.get(RANDOM.nextInt(normalSplashes.size()));
-		cir.setReturnValue(parse(selected));
+		cir.setReturnValue(new SplashTextRenderer(parse(selected)));
 	}
 
 	@Unique
